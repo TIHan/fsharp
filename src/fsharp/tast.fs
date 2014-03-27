@@ -799,6 +799,7 @@ type Entity =
 
     /// Indicates if this is an F#-defined struct or enum type definition , i.e. a value type definition
     member x.IsFSharpStructOrEnumTycon =
+        x.IsRecordTycon ||
         x.IsFSharpObjectModelTycon &&
         match x.FSharpObjectModelTypeInfo.fsobjmodel_kind with 
         | TTyconClass | TTyconInterface   | TTyconDelegate _ -> false
