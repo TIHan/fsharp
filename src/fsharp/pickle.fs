@@ -1819,8 +1819,8 @@ and u_tycon_repr st =
         let tag2 = u_byte st
         match tag2 with
         | 0 -> 
-            let v = u_tycon_recd_data st 
-            (fun _flagBit -> TRecdRepr v)
+            let v = u_rfield_table st 
+            (fun _flagBit -> TRecdRepr {recd_kind=TyconRecdKind.TyconClass; recd_fields=v})
         | 1 -> 
             let v = u_list u_unioncase_spec  st 
             (fun _flagBit -> MakeUnionRepr v)
@@ -1857,10 +1857,6 @@ and u_tycon_repr st =
 and u_tycon_objmodel_data st = 
     let x1,x2,x3 = u_tup3 u_tycon_objmodel_kind u_vrefs u_rfield_table st
     {fsobjmodel_kind=x1; fsobjmodel_vslots=x2; fsobjmodel_rfields=x3 }
-
-and u_tycon_recd_data st =
-    let x1,x2 = u_tup2 u_tycon_recd_kind u_rfield_table st
-    {recd_kind=x1; recd_fields=x2 }
   
 and u_unioncase_spec st = 
     let a,b,c,d,e,f,i = u_tup7 u_rfield_table u_typ u_string u_ident u_attribs u_string u_access st
@@ -2033,13 +2029,6 @@ and u_tycon_objmodel_kind st =
     | 3 -> u_slotsig st |> TTyconDelegate
     | 4 -> TTyconEnum 
     | _ -> ufailwith st "u_tycon_objmodel_kind"
-
-and u_tycon_recd_kind st =
-    let tag = u_byte st
-    match tag with
-    | 0 -> TyconRecdKind.TyconClass
-    | 1 -> TyconRecdKind.TyconStruct
-    | _ -> ufailwith st "u_tycon_recd_kind"
 
 and u_mustinline st = 
     match u_byte st with 
