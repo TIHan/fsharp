@@ -13206,7 +13206,7 @@ module EstablishTypeDefinitionCores = begin
             if hasClassAttr && not (match k with TyconClass -> true | _ -> false) || 
                hasMeasureAttr && not (match k with TyconClass | TyconAbbrev | TyconHiddenRepr -> true | _ -> false)  || 
                hasInterfaceAttr && not (match k with TyconInterface -> true | _ -> false) || 
-               hasStructAttr && not (match k with TyconStruct -> true | _ -> false) then 
+               hasStructAttr && not (match k with TyconStruct | TyconRecord -> true | _ -> false) then 
                 error(Error(FSComp.SR.tcKindOfTypeSpecifiedDoesNotMatchDefinition(),m))
             k
 
@@ -13741,7 +13741,11 @@ module EstablishTypeDefinitionCores = begin
                   | SynTypeDefnSimpleRepr.TypeAbbrev _ -> None
                   | SynTypeDefnSimpleRepr.Union _ -> None
                   | SynTypeDefnSimpleRepr.LibraryOnlyILAssembly _ -> None
-                  | SynTypeDefnSimpleRepr.Record _ -> Some cenv.g.system_Value_typ
+                  | SynTypeDefnSimpleRepr.Record _ ->
+                      let hasStructAttr = HasFSharpAttribute cenv.g cenv.g.attrib_StructAttribute attrs
+                      match hasStructAttr with
+                      | true -> Some cenv.g.system_Value_typ
+                      | _ -> None
                   | SynTypeDefnSimpleRepr.General (kind,_,slotsigs,fields,isConcrete,_,_,_) ->
                       let kind = InferTyconKind cenv.g (kind,attrs,slotsigs,fields,inSig,isConcrete,m)
                                            
