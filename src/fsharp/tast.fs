@@ -1222,6 +1222,7 @@ and
     member x.TrueInstanceFieldsAsList = x.AllFieldsAsList |> List.filter (fun f -> not f.IsStatic && not f.IsCompilerGenerated)
 
 and
+    [<RequireQualifiedAccess>]
     TyconRecdKind =
     /// Indicates the type is a class
     | TyconClass
