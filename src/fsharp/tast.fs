@@ -657,7 +657,7 @@ type Entity =
     /// static fields, 'val' declarations and hidden fields from the compilation of implicit class constructions.
     member x.AllFieldTable = 
         match x.TypeReprInfo with 
-        | TRecdRepr x | TFsObjModelRepr {fsobjmodel_rfields=x} -> x
+        | TRecdRepr {recd_fields=x} | TFsObjModelRepr {fsobjmodel_rfields=x} -> x
         |  _ -> 
         match x.ExceptionInfo with 
         | TExnFresh x -> x
@@ -1095,7 +1095,7 @@ and
     | TFsObjModelRepr    of TyconObjModelData
 
     /// Indicates the type is a record 
-    | TRecdRepr          of TyconRecdFields
+    | TRecdRepr          of TyconRecdData
 
     /// Indicates the type is a discriminated union 
     | TFiniteUnionRepr   of TyconUnionData 
