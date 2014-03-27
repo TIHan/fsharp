@@ -1219,7 +1219,27 @@ and
     member x.FieldByName n = x.FieldsByName.TryFind(n)
     member x.AllFieldsAsList = x.FieldsByIndex |> Array.toList
     member x.TrueFieldsAsList = x.AllFieldsAsList |> List.filter (fun f -> not f.IsCompilerGenerated)   
-    member x.TrueInstanceFieldsAsList = x.AllFieldsAsList |> List.filter (fun f -> not f.IsStatic && not f.IsCompilerGenerated)   
+    member x.TrueInstanceFieldsAsList = x.AllFieldsAsList |> List.filter (fun f -> not f.IsStatic && not f.IsCompilerGenerated)
+
+and
+    TyconRecdKind =
+    /// Indicates the type is a class
+    | TyconClass
+    /// Indicates the type is a struct 
+    | TyconStruct
+
+    member x.IsValueType =
+        match x with
+        | TyconClass -> false
+        | TyconStruct -> true
+
+and
+    [<NoEquality; NoComparison>]
+    TyconRecdData =
+    { /// Indicates whether the type declaration is a class or struct 
+      recd_kind: TyconRecdKind;
+      /// The fields of the record.
+      recd_fields: TyconRecdFields } 
 
 and 
     [<NoEquality; NoComparison>]
