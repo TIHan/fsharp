@@ -1615,7 +1615,7 @@ let rec dummy x = x
 and p_tycon_repr x st = 
     // The leading "p_byte 1" and "p_byte 0" come from the F# 2.0 format, which used an option value at this point.
     match x with 
-    | TRecdRepr fs             -> p_byte 1 st; p_byte 0 st; p_rfield_table fs.recd_fields st; false
+    | TRecdRepr fs             -> p_byte 1 st; p_byte 0 st; p_tycon_recd_kind fs.recd_kind st; p_rfield_table fs.recd_fields st; false
     | TFiniteUnionRepr x       -> p_byte 1 st; p_byte 1 st; p_list p_unioncase_spec (Array.toList x.CasesTable.CasesByIndex) st; false
     | TAsmRepr ilty            -> p_byte 1 st; p_byte 2 st; p_ILType ilty st; false
     | TFsObjModelRepr r        -> p_byte 1 st; p_byte 3 st; p_tycon_objmodel_data r st; false
@@ -1744,6 +1744,11 @@ and p_tycon_objmodel_kind x st =
     | TTyconDelegate ss -> p_byte 3 st; p_slotsig ss st
     | TTyconEnum        -> p_byte 4 st
 
+and p_tycon_recd_kind x st =
+    match x with
+    | TyconRecdKind.TyconClass -> p_byte 0 st
+    | TyconRecdKind.TyconStruct -> p_byte 1 st
+
 and p_mustinline x st = 
     p_byte (match x with 
             | ValInline.PseudoVal -> 0
@@ -1818,9 +1823,10 @@ and u_tycon_repr st =
     | 1 -> 
         let tag2 = u_byte st
         match tag2 with
-        | 0 -> 
+        | 0 ->
+            let kind = u_tycon_recd_kind st 
             let v = u_rfield_table st 
-            (fun _flagBit -> TRecdRepr {recd_kind=TyconRecdKind.TyconClass; recd_fields=v})
+            (fun _flagBit -> TRecdRepr {recd_kind=kind; recd_fields=v})
         | 1 -> 
             let v = u_list u_unioncase_spec  st 
             (fun _flagBit -> MakeUnionRepr v)
@@ -2029,6 +2035,13 @@ and u_tycon_objmodel_kind st =
     | 3 -> u_slotsig st |> TTyconDelegate
     | 4 -> TTyconEnum 
     | _ -> ufailwith st "u_tycon_objmodel_kind"
+
+and u_tycon_recd_kind st =
+    let tag = u_byte st
+    match tag with
+    | 0 -> TyconRecdKind.TyconClass
+    | 1 -> TyconRecdKind.TyconStruct
+    | _ -> ufailwith st "u_tycon_recd_kind"
 
 and u_mustinline st = 
     match u_byte st with 
